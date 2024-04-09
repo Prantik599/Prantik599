@@ -1,0 +1,18 @@
+#include<iostream>
+using namespace std;
+int boom=9;
+void kloot()
+{
+    int boom=8;
+    cout<<boom;
+}
+int main()
+{
+    bool t=true;
+    int boom=7;
+    boom=9;
+    cout<<boom;
+    kloot();
+    cout<<boom<<t;
+    return 0;
+}
