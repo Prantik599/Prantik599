@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Game Picker – Slot Machine</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Righteous&display=swap');
+
+body {
+  font-family: 'Press Start 2P', cursive;
+  background: #0d0d0d;
+  color: #00ff9f;
+  margin: 0;
+  padding: 20px;
+  background-size: cover;
+  background-attachment: fixed;
+  background-position: center;
+  text-shadow: 0 0 6px #00ff9f;
+}
+
+h1 {
+  text-align: center;
+  font-size: 1.6rem;
+  animation: glowPulse 2s infinite;
+}
+
+@keyframes glowPulse {
+  0%,100% { text-shadow: 0 0 6px #00ff9f; }
+  50% { text-shadow: 0 0 14px #00ffaa; }
+}
+
+.container {
+  max-width: 550px;
+  margin: auto;
+  background: #000;
+  padding: 25px;
+  border-radius: 12px;
+  border: 2px solid #00ff9f55;
+  box-shadow: 0 0 20px #00ff9f44;
+}
+
+input[type="text"] {
+  width: 70%;
+  padding: 10px;
+  border: 2px solid #00ff9f;
+  border-radius: 6px;
+  background: #000;
+  color: #00ff9f;
+  font-family: 'Righteous', cursive;
+}
+
+.button {
+  padding: 8px 10px;
+  background: #00ff9f;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  margin: 3px;
+  font-family: 'Righteous', cursive;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-shadow: 2px 2px 6px #007744, 0 0 8px #00ffaa;
+}
+.button:hover { transform: scale(1.1); }
+
+.game-item {
+  display: grid;
+  grid-template-columns: 1fr 30px;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #00ff9f33;
+}
+
+#slot-screen { display: none; text-align: center; }
+
+#slot {
+  margin: 30px auto 10px auto;
+  width: 320px;
+  height: 140px;
+  background: #000;
+  border: 4px solid #00ff9f;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 0 20px #00ff9f88;
+}
+
+#reel.blurred { filter: blur(5px); }
+
+.reel {
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.reel-item {
+  height: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Righteous', cursive;
+  border-bottom: 1px solid #00ff9f33;
+  font-size: 1rem;
+}
+
+#result {
+  position: absolute;
+  top: 45px;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  color: #ffdd22;
+  font-size: 1.1rem;
+  text-shadow: 0 0 10px #ffaa00;
+  font-family: 'Righteous', cursive;
+  display: none;
+  z-index: 2;
+}
+
+#pressGo {
+  position: absolute;
+  top: 50px;
+  width: 100%;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #ffcc00;
+  text-shadow: 0 0 6px #ffaa00;
+  font-family: 'Righteous', cursive;
+  animation: blink 1s steps(2, start) infinite;
+  z-index: 3;
+  pointer-events: none;
+}
+
+@keyframes blink { 50% { opacity: 0; } }
+
+#historyPanel {
+  width: 320px;
+  max-height: 120px;
+  margin: 10px auto 0 auto;
+  background: transparent;
+  overflow-y: auto;
+  font-size: 10px;
+  padding: 6px;
+  border: none;
+  display: none;
+}
+
+#historyPanel::-webkit-scrollbar { width: 0px; }
+#historyPanel:hover::-webkit-scrollbar { width: 6px; }
+#historyPanel::-webkit-scrollbar-thumb {
+  background: #00ff99;
+  border-radius: 4px;
+}
+
+.historyItem { padding: 2px 0; color: #00ffcc; }
+
+#hamburger {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  width: 30px;
+  cursor: pointer;
+  z-index: 2000;
+}
+#hamburger div {
+  height: 4px;
+  background: #00ff9f;
+  border-radius: 2px;
+  margin: 5px 0;
+}
+
+#settings-menu {
+  position: fixed;
+  top: 60px;
+  left: 20px;
+  background: #000;
+  border: 2px solid #00ff9f;
+  padding: 15px;
+  border-radius: 10px;
+  width: 260px;
+  height: 300px;
+  overflow-y: auto;
+  display: none;
+  z-index: 1500;
+  box-shadow: 0 0 20px #00ff9f55;
+}
+
+#settings-menu::-webkit-scrollbar { width: 8px; }
+#settings-menu::-webkit-scrollbar-thumb { background: #00ff99; border-radius: 4px; box-shadow:0 0 4px #00ffaa; }
+
+.settings-item {
+  padding: 8px 0;
+  line-height: 18px;
+  cursor: pointer;
+  border-bottom: 1px solid #00ff9f33;
+  font-size: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.settings-item:hover { color: #55ffcc; text-shadow: 0 0 6px #55ffcc; }
+
+.subpanel {
+  display: none;
+  padding: 10px;
+  margin-top: 8px;
+  background: rgba(0,0,0,0.75);
+  border: 2px solid #00ff55;
+  border-radius: 10px;
+  box-shadow: 0 0 15px #00ff5560;
+}
+
+input[type="checkbox"] {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #00ff55;
+  background: #000;
+  cursor: pointer;
+  box-shadow: 0 0 8px #00ff5575, inset 0 0 6px #002200;
+  image-rendering: pixelated;
+}
+input[type="checkbox"]:checked { background: #00ff55; }
+
+select {
+  background: #000;
+  border: 2px solid #00ff55;
+  color: #00ff99;
+  font-family: "Press Start 2P";
+  font-size: 10px;
+  width: 110px;
+  padding: 4px;
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 0 8px #00ff5575;
+}
+</style>
+</head>
+<body>
+
+<div id="hamburger" onclick="toggleSettings()"><div></div><div></div><div></div></div>
+
+<div id="settings-menu">
+  <h3 style="margin:0; padding:0 0 10px 0; font-size:14px;">OPTIONS</h3>
+
+  <div class="settings-item" onclick="toggleRarityPanel()">Set Rarity</div>
+  <div id="rarityPanel" class="subpanel"></div>
+
+  <div class="settings-item" onclick="toggleBackgroundPanel()">Background</div>
+  <div id="backgroundPanel" class="subpanel">
+    <input type="file" id="bgInput" accept="image/*" style="width:100%;">
+  </div>
+
+  <button class="button" onclick="resetRarity()">Reset Rarity</button>
+  <button class="button" onclick="resetHistory()">Reset History</button>
+</div>
+
+<h1>Game Picker</h1>
+
+<div class="container" id="main-screen">
+  <input type="text" id="gameInput" placeholder="Enter game name">
+  <button class="button" onclick="addGame()">Add</button>
+
+  <h3>Your Games</h3>
+  <div id="gameList"></div>
+
+  <button class="button" onclick="toggleAll()" id="checkAllBtn">Check All</button>
+  <button class="button" id="removeBtn" onclick="removeChecked()" style="display:none;">Remove Checked</button>
+  <button class="button" id="nextBtn" onclick="goToSlot()" style="display:none;">Next</button>
+</div>
+
+<div id="slot-screen">
+  <button class="button" onclick="goBack()">Back</button>
+
+  <div id="slot">
+    <div class="reel blurred" id="reel"></div>
+    <div id="result"></div>
+    <div id="pressGo">PRESS GO</div>
+  </div>
+
+  <button class="button" onclick="spinSlot()">GO!</button>
+
+  <div id="historyPanel"></div>
+</div>
+
+<script>
+let games = JSON.parse(localStorage.getItem("games") || "[]");
+let rarity = JSON.parse(localStorage.getItem("rarity") || "{}");
+let historyData = JSON.parse(localStorage.getItem("history")||"[]");
+
+let savedBg = localStorage.getItem("bgImage");
+if (savedBg) document.body.style.backgroundImage = `url('${savedBg}')`;
+
+function save() { 
+  localStorage.setItem("games", JSON.stringify(games));
+  localStorage.setItem("rarity", JSON.stringify(rarity));
+  localStorage.setItem("history", JSON.stringify(historyData));
+}
+
+function render() {
+  let list = document.getElementById("gameList");
+  list.innerHTML = "";
+  games.forEach((g,i)=>{
+    list.innerHTML += `<div class="game-item"><span>${g.name}</span>
+      <input type="checkbox" ${g.checked?"checked":""} onclick="toggleCheck(${i})"></div>`;
+  });
+  const any = games.some(g=>g.checked);
+  document.getElementById("nextBtn").style.display = any ? "inline-block" : "none";
+  document.getElementById("removeBtn").style.display = any ? "inline-block" : "none";
+}
+
+function addGame() {
+  const input = document.getElementById("gameInput");
+  const name = input.value.trim();
+  if (!name) return;
+  games.push({name,checked:false});
+  rarity[name] = rarity[name] || "normal";
+  save(); input.value=""; render();
+}
+
+function toggleCheck(i){ games[i].checked = !games[i].checked; save(); render(); }
+function toggleAll(){ const all = games.every(g=>g.checked); games.forEach(g=>g.checked=!all); save(); render(); }
+function removeChecked(){ games = games.filter(g=>!g.checked); save(); render(); }
+
+function buildReel() {
+  const reel = document.getElementById("reel");
+  reel.innerHTML = "";
+  games.filter(g=>g.checked).forEach(g=>{
+    let weight = {common:5, normal:3, rare:2, ultra:1}[rarity[g.name]||"normal"];
+    for (let i=0;i<weight;i++){
+      let d = document.createElement("div"); d.className="reel-item"; d.innerHTML=g.name; reel.appendChild(d);
+    }
+  });
+}
+
+function goToSlot(){
+  document.getElementById("main-screen").style.display="none";
+  document.getElementById("slot-screen").style.display="block";
+  document.getElementById("reel").classList.add("blurred");
+  document.getElementById("pressGo").style.display = "block";
+  document.getElementById("result").style.display="none";
+  document.getElementById("historyPanel").style.display = "block";
+  buildReel();
+  renderHistory();
+}
+
+function goBack(){
+  document.getElementById("slot-screen").style.display="none";
+  document.getElementById("main-screen").style.display="block";
+  document.getElementById("result").style.display="none";
+  document.getElementById("historyPanel").style.display = "none";
+}
+
+function spinSlot() {
+  const reel = document.getElementById("reel");
+  const items = Array.from(reel.children);
+  if (!items.length) return;
+
+  document.getElementById("reel").classList.remove("blurred");
+  document.getElementById("result").style.display="none";
+  document.getElementById("pressGo").style.display = "none";
+
+  const winner = items[Math.floor(Math.random()*items.length)];
+  const offset = items.indexOf(winner) * 60;
+  reel.style.transition = "transform 1.4s cubic-bezier(.42,0,.58,1)";
+  reel.style.transform = `translateY(-${offset}px)`;
+
+  setTimeout(()=>{
+    const res = document.getElementById("result");
+    res.innerHTML = winner.innerHTML;
+    res.style.display="block";
+    document.getElementById("reel").classList.add("blurred");
+    addToHistory(winner.innerHTML);
+  },1500);
+}
+
+function toggleSettings(){ let m = document.getElementById("settings-menu"); m.style.display = (m.style.display==="block") ? "none" : "block"; }
+function toggleRarityPanel() {
+  const p = document.getElementById("rarityPanel");
+  const open = p.style.display !== "block";
+  p.style.display = open ? "block" : "none";
+  if (!open) return;
+  p.innerHTML = games.map(g => `<div style="display:flex; justify-content:space-between; padding:8px 0;">
+    <span>${g.name}</span>
+    <select onchange="setRarity('${g.name}', this.value)">
+      <option value="common" ${rarity[g.name]=="common"?"selected":""}>Common</option>
+      <option value="normal" ${rarity[g.name]=="normal"?"selected":""}>Normal</option>
+      <option value="rare" ${rarity[g.name]=="rare"?"selected":""}>Rare</option>
+      <option value="ultra" ${rarity[g.name]=="ultra"?"selected":""}>Ultra</option>
+    </select>
+  </div>`).join("");
+}
+function setRarity(name,val){ rarity[name]=val; save(); }
+function resetRarity(){ games.forEach(g=>rarity[g.name]="normal"); save(); toggleRarityPanel(); toggleRarityPanel(); }
+
+function toggleBackgroundPanel() { const p = document.getElementById("backgroundPanel"); p.style.display = p.style.display==="block"?"none":"block"; }
+document.getElementById("bgInput").addEventListener("change", e=>{
+  const f = e.target.files[0]; if(!f) return;
+  const url = URL.createObjectURL(f);
+  document.body.style.backgroundImage = `url('${url}')`;
+  localStorage.setItem("bgImage", url);
+});
+
+function addToHistory(res){
+  let t = new Date().toLocaleTimeString();
+  historyData.unshift(`${t} — ${res}`);
+  save();
+  renderHistory();
+}
+function renderHistory(){
+  let panel = document.getElementById("historyPanel");
+  panel.innerHTML = "";
+  historyData.forEach(item=>{
+    let d = document.createElement("div");
+    d.className="historyItem"; d.textContent=item;
+    panel.appendChild(d);
+  });
+}
+function resetHistory(){
+  historyData = [];
+  localStorage.setItem("history","[]");
+  renderHistory();
+}
+
+render();
+</script>
+
+</body>
+</html>
